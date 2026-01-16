@@ -52,6 +52,40 @@ const getById = async (req, res) => {
     }
 };
 
+// Obtener solicitudes del cliente autenticado
+const getByClient = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { data, error } = await supabase
+            .from(tableName)
+            .select('*')
+            .eq('cliente_usuario_id', userId)
+            .order('creado_en', { ascending: false });
+
+        if (error) throw error;
+        res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Obtener solicitudes para el proveedor autenticado
+const getByProvider = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { data, error } = await supabase
+            .from(tableName)
+            .select('*')
+            .eq('proveedor_usuario_id', userId)
+            .order('creado_en', { ascending: false });
+
+        if (error) throw error;
+        res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 const update = async (req, res) => {
     try {
         const { id } = req.params;
@@ -69,6 +103,26 @@ const update = async (req, res) => {
         if (error) throw error;
 
         res.status(200).json({ message: 'Solicitud actualizada', data: data[0] });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Actualizar solo el estado de una solicitud
+const updateStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const { data, error } = await supabase
+            .from(tableName)
+            .update({ estado: status, actualizado_en: new Date().toISOString() })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        res.status(200).json(data);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -95,6 +149,10 @@ module.exports = {
     create,
     getAll,
     getById,
+    getByClient,
+    getByProvider,
     update,
+    updateStatus,
     remove
 };
+

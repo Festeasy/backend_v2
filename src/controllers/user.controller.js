@@ -1,15 +1,19 @@
 const supabase = require('../config/supabase');
 const { tableName } = require('../models/user.model');
 const { generateToken } = require('../utils/jwt');
+const crypto = require('crypto');
 
 // Create - Register user
 const create = async (req, res) => {
     try {
         const { correo_electronico, contrasena, rol } = req.body;
 
+        // Generar UUID para el nuevo usuario
+        const id = crypto.randomUUID();
+
         const { data, error } = await supabase
             .from(tableName)
-            .insert([{ correo_electronico, contrasena, rol }])
+            .insert([{ id, correo_electronico, contrasena, rol }])
             .select();
 
         if (error) throw error;
